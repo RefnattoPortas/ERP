@@ -1,0 +1,22 @@
+appId: com.playartspets.erp
+productName: ERP Playarts Pets
+directories:
+  output: dist
+  buildResources: public
+files:
+  - main.js
+  - package.json
+  - .next/**/*
+  - public/**/*
+  - node_modules/**/*
+  - local.db
+win:
+  target: nsis
+  icon: public/favicon.ico
+nsis:
+  oneClick: false
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: true
+  installerIcon: public/favicon.ico
+  uninstallerIcon: public/favicon.ico
+  installerHeaderIcon: public/favicon.ico
