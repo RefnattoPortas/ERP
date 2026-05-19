@@ -189,11 +189,11 @@ export default function ConfiguracoesPage() {
       const data = await getConfiguracoes();
       if (data) {
         // Garantir que nenhum campo seja null para evitar erros no React
-        const safeData = { ...data };
+        const safeData = { ...data } as any;
         Object.keys(safeData).forEach(key => {
           if (safeData[key] === null) safeData[key] = "";
         });
-        setConfig(safeData as any);
+        setConfig(safeData);
       }
     }
     loadConfig();
