@@ -16,7 +16,7 @@ import {
   Clock
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { getDashboardStats } from "./actions";
+import { getDashboardStats } from "../actions";
 
 export default function DashboardPage() {
   const [activeTab, setActiveTab] = useState<"pedidos" | "lembretes">("pedidos");

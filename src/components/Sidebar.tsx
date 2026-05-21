@@ -21,7 +21,7 @@ import {
 import { cn } from "@/lib/utils";
 
 const menuItems = [
-  { icon: LayoutDashboard, label: "Inicial", href: "/" },
+  { icon: LayoutDashboard, label: "Inicial", href: "/dashboard" },
   { icon: ShoppingCart, label: "Pedidos", href: "/pedidos" },
   { icon: Package, label: "Estoque", href: "/estoque" },
   { icon: ClipboardList, label: "Kanban", href: "/kanban" },
@@ -65,7 +65,7 @@ export function Sidebar() {
 
       <nav className="flex-1 px-4 py-8 space-y-1">
         {menuItems.map((item) => {
-          const isExactActive = item.href === "/" ? pathname === "/" : pathname.startsWith(item.href);
+          const isExactActive = item.href === "/dashboard" ? pathname === "/dashboard" : pathname.startsWith(item.href);
 
           return (
             <Link
