@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import type { ElementType } from "react";
 import { 
   TrendingUp, 
   AlertCircle, 
@@ -20,7 +21,19 @@ import { getDashboardStats } from "../actions";
 
 export default function DashboardPage() {
   const [activeTab, setActiveTab] = useState<"pedidos" | "lembretes">("pedidos");
-  const [stats, setStats] = useState<any>(null);
+  const [stats, setStats] = useState<{
+    saldo: number;
+    vendasMes: number;
+    contasHoje: number;
+    estoqueCritico: number;
+    recentOrders: Array<{
+      id: string;
+      total: number;
+      status: string;
+      date: string;
+      cliente: { name: string } | null;
+    }>;
+  } | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -96,7 +109,7 @@ export default function DashboardPage() {
                     {isLoading ? (
                       <p className="text-[10px] text-muted font-black uppercase tracking-widest text-center py-8 italic">Carregando dados reais...</p>
                     ) : stats?.recentOrders.length > 0 ? (
-                      stats.recentOrders.map((order: any) => (
+                      stats.recentOrders.map((order: { id: string; cliente: { name: string } | null; total: number; status: string; date: string }) => (
                         <div key={order.id} className="flex items-center justify-between py-2.5 px-4 rounded-xl hover:bg-background transition-colors cursor-pointer border border-transparent hover:border-card-border group">
                           <div className="flex items-center gap-3 overflow-hidden">
                             <div className="w-7 h-7 rounded-full bg-background flex-shrink-0 flex items-center justify-center border border-card-border group-hover:border-secondary/30 transition-colors shadow-sm">
@@ -214,7 +227,7 @@ function StatCard({
   color, 
   isAlert = false 
 }: { 
-  icon: any, 
+  icon: ElementType, 
   label: string, 
   value: string, 
   trend: string, 
@@ -255,7 +268,7 @@ function StatCard({
   );
 }
 
-function ActionButtonSquare({ icon: Icon, label, shortcut }: { icon: any, label: string, shortcut: string }) {
+function ActionButtonSquare({ icon: Icon, label, shortcut }: { icon: ElementType, label: string, shortcut: string }) {
   return (
     <button className="flex flex-col items-center justify-center gap-2 w-28 h-28 rounded-2xl border-2 border-card-border bg-card hover:border-secondary hover:shadow-md hover:shadow-secondary/5 transition-all group text-center cursor-pointer">
       <div className="p-2 rounded-full bg-background border-2 border-card-border group-hover:bg-secondary/10 group-hover:border-secondary/20 transition-colors">

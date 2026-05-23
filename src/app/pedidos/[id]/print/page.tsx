@@ -26,7 +26,7 @@ export default async function PrintPedidoPage({ params }: { params: Promise<{ id
     validade: config?.validadeOrcamento || 15
   };
 
-  const cliente: any = pedido.cliente || {};
+  const cliente = pedido.cliente || { name: "", company: "", doc: "", email: "", phone: "" };
 
   return (
     <div className="min-h-screen bg-gray-100 print:bg-white flex items-start justify-center py-8 print:py-0 font-sans text-gray-900">
@@ -110,7 +110,7 @@ export default async function PrintPedidoPage({ params }: { params: Promise<{ id
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
-              {pedido.itens?.map((item: any, index: number) => (
+              {pedido.itens?.map((item: { id: number | string; produto?: { name: string }; unit?: string; quantity: number; price: number }, index: number) => (
                 <tr key={item.id} className="text-xs">
                   <td className="py-3 text-center font-bold text-gray-500">{index + 1}</td>
                   <td className="py-3 font-bold text-slate-800 uppercase pr-4">

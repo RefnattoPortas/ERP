@@ -25,6 +25,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { getConfiguracoes, saveConfiguracoes } from "./actions";
+import { supabase } from "@/lib/supabase";
 
 const THEMES = [
   { 
@@ -231,6 +232,7 @@ export default function ConfiguracoesPage() {
             { id: "notificacoes", icon: Bell, label: "NOTIFICAÇÕES" },
             { id: "seguranca", icon: Shield, label: "SEGURANÇA" },
             { id: "backup", icon: Database, label: "BACKUP E DADOS" },
+            { id: "suporte", icon: MessageSquare, label: "SUPORTE TÉCNICO" },
           ].map((tab) => (
             <button
               key={tab.id}
@@ -539,6 +541,101 @@ export default function ConfiguracoesPage() {
                   <Save size={14} />
                   {isSaving ? "SALVANDO..." : "SALVAR PADRÕES"}
                 </button>
+              </div>
+            </section>
+          )}
+
+          {activeTab === "suporte" && (
+            <section className="bg-card border border-card-border shadow-sm rounded-[5px] overflow-hidden animate-in fade-in slide-in-from-right-4 duration-300">
+              <div className="p-4 border-b border-card-border bg-background/30">
+                 <h2 className="text-[10px] font-black text-foreground uppercase tracking-[0.2em]">SUPORTE TÉCNICO E AJUDA</h2>
+              </div>
+              
+              <div className="p-8 space-y-6">
+                <p className="text-muted text-xs font-semibold leading-relaxed uppercase tracking-tight opacity-80">
+                  Precisa de auxílio técnico ou tem alguma dúvida sobre a plataforma ERP? Preencha o formulário abaixo para enviar sua solicitação diretamente ao nosso time técnico inquilino.
+                </p>
+                
+                <div className="bg-background/40 border border-card-border rounded-xl p-6 space-y-4">
+                  <div className="space-y-2">
+                    <label className="text-[9px] font-black text-muted uppercase tracking-widest block">
+                      DESCREVA SEU PROBLEMA OU DÚVIDA
+                    </label>
+                    <textarea 
+                      id="mensagem-suporte"
+                      rows={5}
+                      className="w-full bg-background border border-card-border rounded-xl px-4 py-3 text-sm font-bold focus:ring-2 focus:ring-secondary/20 focus:border-secondary outline-none transition-all resize-none text-foreground"
+                      placeholder="Descreva detalhadamente a situação. Informe dados úteis (clientes, itens de estoque, códigos de pedidos) para facilitar a resolução."
+                    />
+                  </div>
+                  
+                  <div className="flex justify-end">
+                    <button 
+                      id="btn-enviar-suporte"
+                      onClick={async () => {
+                        const btn = document.getElementById("btn-enviar-suporte") as HTMLButtonElement;
+                        const textarea = document.getElementById("mensagem-suporte") as HTMLTextAreaElement;
+                        const msg = textarea?.value;
+                        if (!msg?.trim()) {
+                          alert("Por favor, digite uma mensagem.");
+                          return;
+                        }
+                        
+                        btn.disabled = true;
+                        btn.innerText = "ENVIANDO CHAMADO...";
+                        
+                        try {
+                          const { data: { user } } = await supabase.auth.getUser();
+                          if (!user) {
+                            alert("Erro de autenticação: Usuário não logado no Supabase.");
+                            btn.disabled = false;
+                            btn.innerText = "ENVIAR CHAMADO";
+                            return;
+                          }
+                          
+                          let companyId = user.user_metadata?.empresa_id;
+                          if (!companyId) {
+                            const { data: profile } = await supabase
+                              .from("perfis_usuarios")
+                              .select("empresa_id")
+                              .eq("id", user.id)
+                              .single();
+                            companyId = profile?.empresa_id;
+                          }
+                          
+                          if (!companyId) {
+                            alert("Erro: Não foi possível obter o ID de inquilino ativo.");
+                            btn.disabled = false;
+                            btn.innerText = "ENVIAR CHAMADO";
+                            return;
+                          }
+                          
+                          const { error } = await supabase
+                            .from("chamados_suporte")
+                            .insert({
+                              empresa_id: companyId,
+                              usuario_id: user.id,
+                              mensagem: msg.trim(),
+                              status: "aberto"
+                            });
+                            
+                          if (error) throw error;
+                          
+                          alert("Chamado de suporte aberto com sucesso! Nosso time retornará o contato.");
+                          textarea.value = "";
+                        } catch (err: unknown) {
+                          alert("Erro ao enviar chamado: " + err.message);
+                        } finally {
+                          btn.disabled = false;
+                          btn.innerText = "ENVIAR CHAMADO";
+                        }
+                      }}
+                      className="bg-secondary text-white px-8 py-3 rounded-[5px] font-black text-[10px] uppercase tracking-[0.2em] shadow-lg shadow-secondary/20 hover:scale-[1.01] active:scale-[0.99] transition-all cursor-pointer"
+                    >
+                      ENVIAR CHAMADO
+                    </button>
+                  </div>
+                </div>
               </div>
             </section>
           )}

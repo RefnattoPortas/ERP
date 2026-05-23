@@ -23,7 +23,17 @@ export async function getClientes(searchQuery?: string) {
   }
 }
 
-export async function saveCliente(data: any) {
+interface ClienteInput {
+  id?: number;
+  name: string;
+  company?: string;
+  doc?: string;
+  email?: string;
+  phone?: string;
+  status?: "Ativo" | "Inativo";
+}
+
+export async function saveCliente(data: ClienteInput) {
   try {
     if (data.id) {
       // Update

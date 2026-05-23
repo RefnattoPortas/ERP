@@ -46,6 +46,7 @@ interface Order {
   id: string;
   clienteId: number | null;
   clienteName?: string;
+  cliente?: { name: string; company?: string | null; phone?: string | null };
   date: string;
   total: number;
   status: "Orçamento" | "Venda" | "Finalizado" | "Cancelado" | "Pago" | "Pronto para Retirada" | "Backlog" | "Em Produção" | "Revisão / Acabamento";
@@ -79,7 +80,7 @@ export default function PedidosPage() {
     async function load() {
       setIsLoading(true);
       const ordersData = await getPedidos(searchQuery);
-      setOrders(ordersData as any);
+      setOrders(ordersData as Order[]);
       
       const clientsData = await getClientes();
       setDbClients(clientsData);
@@ -127,7 +128,7 @@ export default function PedidosPage() {
         setClientSearch("");
       }
       
-      setItems(fullOrder.itens.map((i: any) => ({
+      setItems(fullOrder.itens.map((i: { id: number | string; produtoId: number; produto?: { name: string }; unit?: string; quantity: number; price: number }) => ({
         id: Math.random().toString(36).substr(2, 9),
         produtoId: i.produtoId || 0,
         name: i.produto?.name || "Produto Genérico",
@@ -164,7 +165,7 @@ export default function PedidosPage() {
       paymentStatus: status === "Venda" ? (selectedPaymentStatus || "Pendente") : undefined
     };
 
-    const res: any = await savePedido(pedidoData, items);
+    const res = await savePedido(pedidoData, items);
     setIsSaving(false);
     
     if (res.success) {
@@ -192,11 +193,11 @@ export default function PedidosPage() {
     setItems(items.filter(item => item.id !== id));
   };
 
-  const updateItem = (id: string, field: keyof Item, value: any) => {
+  const updateItem = (id: string, field: keyof Item, value: string | number) => {
     setItems(items.map(item => item.id === id ? { ...item, [field]: value } : item));
   };
 
-  const selectProduct = (itemId: string, product: any) => {
+  const selectProduct = (itemId: string, product: { id: number, name: string, cost?: number }) => {
     setItems(items.map(item => 
       item.id === itemId 
         ? { 
@@ -216,9 +217,6 @@ export default function PedidosPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [searchQuery, statusFilter]);
 
   if (isCreating) {
     return (
@@ -511,7 +509,7 @@ export default function PedidosPage() {
 
             <div className="grid grid-cols-2 gap-4 pt-8 border-t border-card-border">
               <button 
-                onClick={(e) => {
+                onClick={() => {
                   if(confirm("Tem certeza que deseja cancelar este orçamento?")) {
                     setIsCreating(false);
                   }
@@ -522,7 +520,7 @@ export default function PedidosPage() {
                 CANCELAR
               </button>
               <button 
-                onClick={(e) => {
+                onClick={() => {
                   if(confirm("Deseja excluir permanentemente este registro?")) {
                     setIsCreating(false);
                   }
@@ -647,7 +645,7 @@ export default function PedidosPage() {
                     setPaymentMethod("Dinheiro / PIX");
                     setPaymentStatus("Pendente");
                     const ordersData = await getPedidos(searchQuery);
-                    setOrders(ordersData as any);
+                    setOrders(ordersData as Order[]);
                   }}
                   className="w-full bg-background border border-card-border text-muted py-3 rounded-lg font-black text-xs uppercase tracking-widest hover:bg-card hover:text-foreground transition-all"
                 >
@@ -663,7 +661,7 @@ export default function PedidosPage() {
 
   // Calculate pagination
   const filteredOrders = orders.filter(order => {
-    const clientName = (order as any).cliente?.name || "";
+    const clientName = order.cliente?.name || "";
     const matchesSearch = clientName.toLowerCase().includes(searchQuery.toLowerCase()) || order.id.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesStatus = statusFilter === "Todos" || order.status === statusFilter;
     return matchesSearch && matchesStatus;
@@ -697,7 +695,7 @@ export default function PedidosPage() {
               placeholder="Buscar por cliente ou ID..." 
               className="w-full bg-card border border-card-border rounded-xl py-2.5 pl-12 pr-4 focus:outline-none focus:ring-2 focus:ring-secondary/20 focus:border-secondary text-sm transition-all font-bold text-foreground placeholder:text-muted/50"
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={(e) => { setSearchQuery(e.target.value); setCurrentPage(1); }}
               onFocus={() => setIsSearchFocused(true)}
               onBlur={() => setTimeout(() => setIsSearchFocused(false), 200)}
             />
@@ -711,12 +709,12 @@ export default function PedidosPage() {
                         key={order.id}
                         className="p-3 hover:bg-background cursor-pointer border-b border-card-border last:border-0 flex justify-between items-center"
                         onClick={() => {
-                          setSearchQuery((order as any).cliente?.name || "");
+                          setSearchQuery(order.cliente?.name || "");
                           setIsSearchFocused(false);
                         }}
                       >
                         <div>
-                          <p className="font-black text-sm text-foreground uppercase tracking-tighter">{(order as any).cliente?.name || "S/ CLIENTE"}</p>
+                          <p className="font-black text-sm text-foreground uppercase tracking-tighter">{order.cliente?.name || "S/ CLIENTE"}</p>
                           <p className="text-[10px] text-muted font-black">{order.id} • {order.date}</p>
                         </div>
                         <span className="text-xs font-black text-foreground">
@@ -752,7 +750,7 @@ export default function PedidosPage() {
               <select
                 className="w-full appearance-none bg-card border border-card-border hover:border-secondary/30 text-foreground text-xs font-black uppercase tracking-widest rounded-[5px] py-2.5 pl-10 pr-8 focus:outline-none focus:ring-2 focus:ring-secondary/20 focus:border-secondary cursor-pointer transition-all shadow-sm"
                 value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value)}
+                onChange={(e) => { setStatusFilter(e.target.value); setCurrentPage(1); }}
               >
                 <option value="Todos">Filtro: Todos</option>
                 <option value="Orçamento">Apenas Orçamentos</option>
@@ -795,12 +793,12 @@ export default function PedidosPage() {
                         title="WhatsApp"
                         onClick={(e) => { 
                           e.stopPropagation(); 
-                          const phone = (order as any).cliente?.phone?.replace(/\D/g, "");
+                          const phone = order.cliente?.phone?.replace(/\D/g, "");
                           if (!phone) {
                             alert("Cliente sem telefone cadastrado.");
                             return;
                           }
-                          const text = encodeURIComponent(`Olá ${(order as any).cliente?.name}, segue o orçamento ${order.id} no valor de R$ ${order.total.toFixed(2)}. Acesse o link para visualizar: ${window.location.origin}/pedidos/${order.id}/print`);
+                          const text = encodeURIComponent(`Olá ${order.cliente?.name}, segue o orçamento ${order.id} no valor de R$ ${order.total.toFixed(2)}. Acesse o link para visualizar: ${window.location.origin}/pedidos/${order.id}/print`);
                           window.open(`https://wa.me/55${phone}?text=${text}`, "_blank");
                         }}
                       >
@@ -822,8 +820,8 @@ export default function PedidosPage() {
                   <td className="py-2 px-6 border-r border-card-border/30 text-xs font-medium text-muted">{order.date}</td>
                   <td className="py-2 px-6 border-r border-card-border/30">
                      <div className="flex flex-col">
-                        <span className="font-medium text-foreground uppercase tracking-tight text-sm group-hover:text-secondary transition-colors">{(order as any).cliente?.name || "Cliente Excluído"}</span>
-                        <span className="text-[10px] text-muted font-medium">{(order as any).cliente?.company || "Venda Direta"}</span>
+                        <span className="font-medium text-foreground uppercase tracking-tight text-sm group-hover:text-secondary transition-colors">{order.cliente?.name || "Cliente Excluído"}</span>
+                        <span className="text-[10px] text-muted font-medium">{order.cliente?.company || "Venda Direta"}</span>
                      </div>
                   </td>
                   <td className="py-2 px-6 border-r border-card-border/30 text-center">

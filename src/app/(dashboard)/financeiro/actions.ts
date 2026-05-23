@@ -38,7 +38,18 @@ export async function getFinanceiro(searchQuery?: string, fromDate?: string, toD
   }
 }
 
-export async function saveLancamento(data: any) {
+interface LancamentoInput {
+  id?: number;
+  date: string;
+  doc?: string;
+  description: string;
+  value: number;
+  category?: string;
+  type: "in" | "out";
+  status?: "Pago" | "Pendente";
+}
+
+export async function saveLancamento(data: LancamentoInput) {
   try {
     if (data.id) {
       await db.update(financeiro).set({

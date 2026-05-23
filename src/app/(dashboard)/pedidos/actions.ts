@@ -2,8 +2,24 @@
 
 import { db } from "@/db";
 import { pedidos, pedidoItens, estoque, financeiro } from "@/db/schema";
-import { eq, like, or, desc, and } from "drizzle-orm";
+import { eq, desc } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
+
+interface PedidoInput {
+  id: string;
+  clienteId: number;
+  date: string;
+  status: string;
+  total: number;
+  paymentMethod?: string;
+  paymentStatus?: string;
+}
+
+interface ItemInput {
+  produtoId: number;
+  quantity: number;
+  price: number;
+}
 
 export async function getPedidos(searchQuery?: string) {
   try {
@@ -29,7 +45,7 @@ export async function getPedidos(searchQuery?: string) {
   }
 }
 
-export async function savePedido(pedidoData: any, itens: any[]) {
+export async function savePedido(pedidoData: PedidoInput, itens: ItemInput[]) {
   try {
     // Start transaction for atomic operation
     return await db.transaction(async (tx) => {

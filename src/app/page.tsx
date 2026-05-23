@@ -37,7 +37,7 @@ export default function LandingPage() {
           </div>
           
           <Link 
-            href="/dashboard" 
+            href="/login" 
             className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest bg-white text-[#1c1917] hover:text-[#059669] border border-[#d6d3d1] hover:border-[#059669] px-5 py-2.5 rounded-[5px] hover:bg-emerald-50/50 shadow-sm hover:shadow-md hover:shadow-emerald-500/5 transition-all duration-300"
           >
             Entrar <ArrowUpRight className="w-3.5 h-3.5 stroke-[3]" />
@@ -76,10 +76,10 @@ export default function LandingPage() {
         {/* Main CTA - Premium Epic Button */}
         <div className="relative z-10 mb-20">
           <Link 
-            href="/dashboard"
+            href="/cadastro"
             className="group inline-flex items-center gap-3 bg-[#059669] text-white font-black text-xs sm:text-sm uppercase tracking-[0.2em] px-10 py-5.5 rounded-[5px] shadow-xl shadow-emerald-700/20 hover:shadow-emerald-700/40 hover:bg-[#047857] hover:-translate-y-0.5 hover:scale-[1.03] active:scale-[0.98] transition-all duration-300 cursor-pointer"
           >
-            Abrir o Sistema
+            Começar Grátis / Criar Conta
             <ArrowUpRight className="w-4 h-4 stroke-[3] group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform duration-300" />
           </Link>
         </div>

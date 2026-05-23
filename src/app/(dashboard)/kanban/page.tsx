@@ -20,6 +20,25 @@ import {
 import { cn } from "@/lib/utils";
 import { getPedidos, savePedido } from "../pedidos/actions";
 
+interface KanbanCard {
+  id: string;
+  title: string;
+  client: string;
+  user: string;
+  priority: string;
+  due: string;
+  status: string;
+  fullData?: {
+    id: string;
+    date: string;
+    status: string;
+    total: number;
+    clienteId: number;
+    cliente?: { name: string } | null;
+    itens?: { produtoId: number; quantity: number; price: number }[];
+  };
+}
+
 const INITIAL_CARDS = [
   { id: "1024", title: "Criação de Logo", client: "Padaria do Zé", user: "Renatinho", priority: "Média", due: "05/04", status: "Backlog" },
   { id: "1025", title: "Impressão 500 Cards", client: "Advocacia Silva", user: "Vendas", priority: "Alta", due: "Hoje", status: "Backlog" },
@@ -30,11 +49,11 @@ const INITIAL_CARDS = [
 const INITIAL_COLUMNS = ["Backlog", "Em Produção", "Revisão / Acabamento", "Pronto para Retirada"];
 
 export default function KanbanPage() {
-  const [cards, setCards] = useState<any[]>([]);
+  const [cards, setCards] = useState<KanbanCard[]>([]);
   const [columns, setColumns] = useState(INITIAL_COLUMNS);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isConfigOpen, setIsConfigOpen] = useState(false);
-  const [editingCard, setEditingCard] = useState<any>(null);
+  const [editingCard, setEditingCard] = useState<KanbanCard | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -42,7 +61,7 @@ export default function KanbanPage() {
       setIsLoading(true);
       const orders = await getPedidos();
       // Only show orders that are not quotes
-      const kanbanOrders = orders.filter((o: any) => o.status !== "Orçamento").map((o: any) => ({
+      const kanbanOrders = orders.filter((o: { status: string }) => o.status !== "Orçamento").map((o: { status: string, id: string, cliente?: { name: string } | null, total: number, date: string, itens?: { produtoId: number; quantity: number; price: number }[], clienteId: number }) => ({
         id: o.id,
         title: `Pedido ${o.id}`,
         client: o.cliente?.name || "Sem Cliente",
@@ -68,7 +87,7 @@ export default function KanbanPage() {
     status: "Backlog"
   });
 
-  const handleOpenForm = (card: any = null) => {
+  const handleOpenForm = (card: KanbanCard | null = null) => {
     if (card) {
       setEditingCard(card);
       setFormData(card);
@@ -340,8 +359,8 @@ function KanbanColumn({
   index: number,
   title: string, 
   count: number, 
-  cards: any[], 
-  onEdit: (c: any) => void, 
+  cards: KanbanCard[], 
+  onEdit: (c: KanbanCard | null) => void, 
   onMove: (id: string, dir: "next" | "prev") => void, 
   onRename: () => void,
   onDelete: () => void,

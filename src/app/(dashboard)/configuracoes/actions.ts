@@ -15,7 +15,25 @@ export async function getConfiguracoes() {
   }
 }
 
-export async function saveConfiguracoes(data: any) {
+interface ConfiguracoesInput {
+  id?: number;
+  razaoSocial?: string | null;
+  nomeFantasia?: string | null;
+  cnpj?: string | null;
+  logradouro?: string | null;
+  bairro?: string | null;
+  cidade?: string | null;
+  estado?: string | null;
+  cep?: string | null;
+  telefone?: string | null;
+  email?: string | null;
+  logoUrl?: string | null;
+  validadeOrcamento?: number | null;
+  formasPagamento?: string | null;
+  observacoesPadrao?: string | null;
+}
+
+export async function saveConfiguracoes(data: ConfiguracoesInput) {
   try {
     const existing = await db.select().from(configuracoes).limit(1);
     

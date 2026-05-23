@@ -23,7 +23,20 @@ export async function getEstoque(searchQuery?: string) {
   }
 }
 
-export async function saveItemEstoque(data: any) {
+interface EstoqueInput {
+  id?: number;
+  name: string;
+  sku: string;
+  category?: string;
+  stock?: number;
+  minStock?: number;
+  cost?: number;
+  purchasePrice?: number;
+  supplier?: string;
+  critical?: boolean;
+}
+
+export async function saveItemEstoque(data: EstoqueInput) {
   try {
     if (data.id) {
       await db.update(estoque).set({
@@ -52,9 +65,9 @@ export async function saveItemEstoque(data: any) {
     }
     revalidatePath("/estoque");
     return { success: true };
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Erro ao salvar item:", error);
-    return { success: false, error: error.message || "Falha ao salvar item" };
+    return { success: false, error: error instanceof Error ? error.message : "Falha ao salvar item" };
   }
 }
 

@@ -13,8 +13,6 @@ import {
   ClipboardList, 
   Calendar as CalendarIcon,
   Settings,
-  Menu, 
-  X, 
   ChevronLeft,
   ChevronRight
 } from "lucide-react";
