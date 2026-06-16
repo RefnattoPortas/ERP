@@ -14,7 +14,8 @@ import {
   Calendar as CalendarIcon,
   Settings,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  X
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -26,43 +27,95 @@ const menuItems = [
   { icon: DollarSign, label: "Financeiro", href: "/financeiro" },
   { icon: Users, label: "Clientes", href: "/clientes" },
   { icon: CalendarIcon, label: "Calendário", href: "/calendario" },
+  { icon: Users, label: "Usuários", href: "/usuarios" },
   { icon: Settings, label: "Configurações", href: "/configuracoes" },
 ];
 
-export function Sidebar() {
+export function Sidebar({ 
+  isOpenMobile = false, 
+  onCloseMobile 
+}: { 
+  isOpenMobile?: boolean; 
+  onCloseMobile?: () => void; 
+}) {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [companyName, setCompanyName] = useState("ERP SISTEMA");
+  const [userRole, setUserRole] = useState("admin");
+  const [userName, setUserName] = useState("Carregando...");
   const pathname = usePathname();
 
   useEffect(() => {
     async function load() {
+      // 1. Carregar nome da empresa
       const config = await getConfiguracoes();
       if (config && (config.nomeFantasia || config.razaoSocial)) {
         setCompanyName(config.nomeFantasia || config.razaoSocial || "ERP SISTEMA");
       }
+
+      // 2. Carregar papel e nome do usuário (Supabase client-side)
+      const { supabase } = await import("@/lib/supabase");
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { data: profile } = await supabase.from("perfis_usuarios").select("nome, role").eq("id", user.id).single();
+        if (profile) {
+          setUserName(profile.nome || "Usuário");
+          setUserRole(profile.role || "funcionario");
+        }
+      }
     }
     load();
-  }, [pathname]); // Recarregar quando mudar de página pode ajudar a manter atualizado
+  }, [pathname]);
+
+  const filteredMenuItems = menuItems.filter(item => {
+    if (userRole === "funcionario") {
+      // Funcionário não vê configurações nem usuários
+      if (item.label === "Configurações" || item.label === "Usuários") {
+        return false;
+      }
+    }
+    return true;
+  });
 
   return (
     <aside 
       className={cn(
-        "bg-sidebar border-r border-card-border sticky top-0 h-screen transition-all duration-300 z-50 flex flex-col",
-        isCollapsed ? "w-20" : "w-64"
+        "bg-sidebar border-r border-card-border h-screen transition-all duration-300 z-50 flex-col",
+        // Comportamento Desktop: Fixo no lado esquerdo
+        "hidden md:flex md:sticky md:top-0",
+        isCollapsed ? "md:w-20" : "md:w-64",
+        // Comportamento Mobile: Drawer flutuante controlado por isOpenMobile
+        "fixed left-0 top-0 transition-transform duration-300 md:translate-x-0",
+        isOpenMobile ? "translate-x-0 flex" : "-translate-x-full md:translate-x-0",
+        "w-64" // O menu mobile sempre ocupa w-64 para legibilidade
       )}
     >
       <div className="p-6 flex items-center justify-between border-b border-card-border">
-        {!isCollapsed && <span className="font-black text-xl text-sidebar-foreground tracking-tighter uppercase">AGIL ERP</span>}
+        <span className={cn("font-black text-xl text-sidebar-foreground tracking-tighter uppercase", isCollapsed && "md:hidden")}>
+          AGIL ERP
+        </span>
+        
+        {/* Botão de colapso - Apenas Desktop */}
         <button 
           onClick={() => setIsCollapsed(!isCollapsed)}
-          className="p-1.5 hover:bg-white/10 text-sidebar-foreground/60 hover:text-sidebar-foreground rounded-lg transition-all cursor-pointer"
+          className="hidden md:block p-1.5 hover:bg-white/10 text-sidebar-foreground/60 hover:text-sidebar-foreground rounded-lg transition-all cursor-pointer"
         >
           {isCollapsed ? <ChevronRight size={20} /> : <ChevronLeft size={20} />}
         </button>
+
+        {/* Botão de fechar - Apenas Mobile */}
+        {onCloseMobile && (
+          <button 
+            onClick={onCloseMobile}
+            className="md:hidden p-1.5 hover:bg-white/10 text-sidebar-foreground/60 hover:text-sidebar-foreground rounded-lg transition-all cursor-pointer"
+            aria-label="Fechar Menu"
+          >
+            <X size={20} />
+          </button>
+        )}
       </div>
 
       <nav className="flex-1 px-4 py-8 space-y-1">
-        {menuItems.map((item) => {
+        {filteredMenuItems.map((item) => {
           const isExactActive = item.href === "/dashboard" ? pathname === "/dashboard" : pathname.startsWith(item.href);
 
           return (
@@ -98,12 +151,12 @@ export function Sidebar() {
           
           <div className={cn("flex items-center gap-3", isCollapsed && "justify-center")}>
             <div className="w-10 h-10 rounded-full bg-secondary text-white flex items-center justify-center font-black text-sm shadow-lg shadow-secondary/20 border-2 border-sidebar">
-              R
+              {userName.charAt(0).toUpperCase()}
             </div>
             {!isCollapsed && (
               <div className="overflow-hidden">
-                <p className="text-xs font-black text-sidebar-foreground truncate uppercase tracking-tight">Renato Luis</p>
-                <p className="text-[10px] text-sidebar-foreground/50 truncate font-bold uppercase tracking-widest">Administrador</p>
+                <p className="text-xs font-black text-sidebar-foreground truncate uppercase tracking-tight">{userName}</p>
+                <p className="text-[10px] text-sidebar-foreground/50 truncate font-bold uppercase tracking-widest">{userRole}</p>
               </div>
             )}
           </div>

@@ -232,57 +232,57 @@ export default function FinanceiroPage() {
             )}
           </div>
 
-          <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto">
-            {/* Action Buttons */}
-            <div className="flex items-center gap-2 w-full sm:w-auto">
-              <button 
-                onClick={() => { setFormType("Despesa"); setIsFormOpen(true); }}
-                className="flex-1 sm:flex-none bg-rose-500 text-white border border-rose-600 px-4 py-2.5 rounded-[5px] font-black text-[10px] uppercase tracking-widest hover:bg-rose-600 transition-all shadow-sm flex items-center justify-center gap-2"
-              >
-                <ArrowDownRight size={14} />
-                Despesa
-              </button>
-              <button 
-                onClick={() => { setFormType("Receita"); setIsFormOpen(true); }}
-                className="flex-1 sm:flex-none bg-emerald-600 text-white px-4 py-2.5 rounded-[5px] font-black text-[10px] uppercase tracking-widest hover:bg-emerald-700 shadow-lg shadow-emerald-500/20 transition-all flex items-center justify-center gap-2"
-              >
-                <ArrowUpRight size={14} />
-                Receita
-              </button>
-            </div>
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
+              {/* Action Buttons */}
+              <div className="flex items-center gap-2 w-full sm:w-auto">
+                <button 
+                  onClick={() => { setFormType("Despesa"); setIsFormOpen(true); }}
+                  className="flex-1 sm:flex-none bg-rose-500 text-white border border-rose-600 px-4 py-2.5 rounded-[5px] font-black text-[10px] uppercase tracking-widest hover:bg-rose-600 transition-all shadow-sm flex items-center justify-center gap-2"
+                >
+                  <ArrowDownRight size={14} />
+                  Despesa
+                </button>
+                <button 
+                  onClick={() => { setFormType("Receita"); setIsFormOpen(true); }}
+                  className="flex-1 sm:flex-none bg-emerald-600 text-white px-4 py-2.5 rounded-[5px] font-black text-[10px] uppercase tracking-widest hover:bg-emerald-700 shadow-lg shadow-emerald-500/20 transition-all flex items-center justify-center gap-2"
+                >
+                  <ArrowUpRight size={14} />
+                  Receita
+                </button>
+              </div>
 
-            <div className="flex items-center gap-2 bg-card border border-card-border rounded-[5px] px-3 py-1.5 shadow-sm">
-               <Calendar size={14} className="text-secondary" />
-               <div className="flex items-center gap-2">
-                  <input 
-                    type="date" 
-                    className="bg-transparent border-none text-[10px] font-black uppercase text-foreground focus:ring-0 p-0 cursor-pointer" 
-                    value={fromDate}
-                    onChange={(e) => setFromDate(e.target.value)}
-                  />
-                  <span className="text-[10px] font-black text-muted uppercase">ATÉ</span>
-                  <input 
-                    type="date" 
-                    className="bg-transparent border-none text-[10px] font-black uppercase text-foreground focus:ring-0 p-0 cursor-pointer" 
-                    value={toDate}
-                    onChange={(e) => setToDate(e.target.value)}
-                  />
-               </div>
-            </div>
+              <div className="flex items-center gap-2 bg-card border border-card-border rounded-[5px] px-3 py-1.5 shadow-sm w-full sm:w-auto">
+                 <Calendar size={14} className="text-secondary shrink-0" />
+                 <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 w-full">
+                    <input 
+                      type="date" 
+                      className="bg-transparent border-none text-[10px] font-black uppercase text-foreground focus:ring-0 p-0 cursor-pointer w-full sm:w-auto" 
+                      value={fromDate}
+                      onChange={(e) => setFromDate(e.target.value)}
+                    />
+                    <span className="text-[10px] font-black text-muted uppercase hidden sm:inline">ATÉ</span>
+                    <input 
+                      type="date" 
+                      className="bg-transparent border-none text-[10px] font-black uppercase text-foreground focus:ring-0 p-0 cursor-pointer w-full sm:w-auto" 
+                      value={toDate}
+                      onChange={(e) => setToDate(e.target.value)}
+                    />
+                 </div>
+              </div>
 
-            <div className="relative w-full sm:w-44 group">
-              <select 
-                className="w-full appearance-none bg-card border border-card-border hover:border-secondary/30 text-foreground text-[10px] font-black uppercase tracking-widest rounded-[5px] py-2.5 pl-10 pr-8 focus:outline-none focus:ring-2 focus:ring-secondary/20 focus:border-secondary cursor-pointer transition-all shadow-sm"
-              >
-                <option>Filtro: Status</option>
-                <option>Apenas Pago</option>
-                <option>Pendente</option>
-                <option>Atrasado</option>
-              </select>
-              <Filter className="absolute left-3.5 top-1/2 -translate-y-1/2 text-secondary" size={14} />
-              <ChevronDown className="absolute right-3.5 top-1/2 -translate-y-1/2 text-muted pointer-events-none" size={14} />
+              <div className="relative w-full sm:w-44 group">
+                <select 
+                  className="w-full appearance-none bg-card border border-card-border hover:border-secondary/30 text-foreground text-[10px] font-black uppercase tracking-widest rounded-[5px] py-2.5 pl-10 pr-8 focus:outline-none focus:ring-2 focus:ring-secondary/20 focus:border-secondary cursor-pointer transition-all shadow-sm"
+                >
+                  <option>Filtro: Status</option>
+                  <option>Apenas Pago</option>
+                  <option>Pendente</option>
+                  <option>Atrasado</option>
+                </select>
+                <Filter className="absolute left-3.5 top-1/2 -translate-y-1/2 text-secondary" size={14} />
+                <ChevronDown className="absolute right-3.5 top-1/2 -translate-y-1/2 text-muted pointer-events-none" size={14} />
+              </div>
             </div>
-          </div>
         </div>
 
         <div className="overflow-x-auto relative z-10">

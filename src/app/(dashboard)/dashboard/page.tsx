@@ -129,7 +129,7 @@ export default function DashboardPage() {
                             )}>
                               {order.status}
                             </span>
-                            <span className="font-bold text-foreground text-xs w-24 text-right">R$ {order.total.toFixed(2).replace('.', ',')}</span>
+                            <span className="font-bold text-foreground text-xs sm:w-24 text-right">R$ {order.total.toFixed(2).replace('.', ',')}</span>
                           </div>
                         </div>
                       ))
@@ -270,7 +270,7 @@ function StatCard({
 
 function ActionButtonSquare({ icon: Icon, label, shortcut }: { icon: ElementType, label: string, shortcut: string }) {
   return (
-    <button className="flex flex-col items-center justify-center gap-2 w-28 h-28 rounded-2xl border-2 border-card-border bg-card hover:border-secondary hover:shadow-md hover:shadow-secondary/5 transition-all group text-center cursor-pointer">
+    <button className="flex flex-col items-center justify-center gap-2 w-24 sm:w-28 h-24 sm:h-28 rounded-2xl border-2 border-card-border bg-card hover:border-secondary hover:shadow-md hover:shadow-secondary/5 transition-all group text-center cursor-pointer">
       <div className="p-2 rounded-full bg-background border-2 border-card-border group-hover:bg-secondary/10 group-hover:border-secondary/20 transition-colors">
         <Icon size={20} className="text-muted group-hover:text-secondary transition-colors" />
       </div>

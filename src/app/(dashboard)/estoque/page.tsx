@@ -303,7 +303,7 @@ export default function EstoquePage() {
               </button>
             </header>
             <div className="p-8 overflow-y-auto space-y-8">
-              <div className="grid grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
                 <div className="bg-emerald-500/10 border border-emerald-500/20 p-4 rounded-[5px]">
                   <p className="text-[10px] font-black uppercase text-emerald-600 mb-1 tracking-widest">Total Entradas</p>
                   <p className="text-2xl font-black text-emerald-600 uppercase tracking-tighter">+ 1.250 un</p>

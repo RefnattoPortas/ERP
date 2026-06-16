@@ -23,7 +23,7 @@ function NovoProdutoForm() {
   const [isLoading, setIsLoading] = useState(!!id);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   
-  const [formData, setFormData] = useState<any>({
+  const [formData, setFormData] = useState<{ name: string, sku: string, category: string, stock: number, minStock: number, cost: number, purchasePrice: number, supplier: string, critical: boolean, photoUrl?: string }>({
     name: "",
     sku: "",
     category: "final",

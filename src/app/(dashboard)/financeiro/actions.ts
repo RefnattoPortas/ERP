@@ -7,7 +7,7 @@ import { revalidatePath } from "next/cache";
 
 export async function getFinanceiro(searchQuery?: string, fromDate?: string, toDate?: string) {
   try {
-    let conditions = [];
+    const conditions = [];
 
     if (searchQuery) {
       conditions.push(

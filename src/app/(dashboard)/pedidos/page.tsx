@@ -55,8 +55,8 @@ interface Order {
 export default function PedidosPage() {
   const router = useRouter();
   const [orders, setOrders] = useState<Order[]>([]);
-  const [dbClients, setDbClients] = useState<any[]>([]);
-  const [dbProducts, setDbProducts] = useState<any[]>([]);
+  const [dbClients, setDbClients] = useState<{ id: number; name: string; company?: string | null }[]>([]);
+  const [dbProducts, setDbProducts] = useState<{ id: number; name: string; cost?: number }[]>([]);
   const [isCreating, setIsCreating] = useState(false);
   const [items, setItems] = useState<Item[]>([]);
   const [clientSearch, setClientSearch] = useState("");
@@ -220,19 +220,19 @@ export default function PedidosPage() {
 
   if (isCreating) {
     return (
-      <div className="flex flex-col lg:flex-row gap-6 h-[calc(100vh-120px)] max-w-[1600px] mx-auto animate-in fade-in slide-in-from-bottom-4 duration-500 transition-colors duration-500">
+      <div className="flex flex-col lg:flex-row gap-6 lg:h-[calc(100vh-120px)] max-w-[1600px] mx-auto animate-in fade-in slide-in-from-bottom-4 duration-500 transition-colors duration-500">
         {/* Main Order Area */}
-        <div className="flex-1 space-y-6 overflow-y-auto pr-2 custom-scrollbar">
-          <header className="flex justify-between items-center bg-card p-6 rounded-[5px] border border-card-border/60 shadow-sm">
-            <div className="flex items-center gap-4">
+        <div className="flex-1 space-y-6 lg:overflow-y-auto lg:pr-2 custom-scrollbar">
+          <header className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 bg-card p-4 sm:p-6 rounded-[5px] border border-card-border/60 shadow-sm">
+            <div className="flex items-center gap-3 sm:gap-4">
               <button 
                 onClick={() => setIsCreating(false)}
-                className="p-2 hover:bg-background rounded-full transition-colors text-muted"
+                className="p-2 hover:bg-background rounded-full transition-colors text-muted shrink-0"
               >
                 <ArrowLeft size={20} />
               </button>
               <div>
-                <h1 className="text-2xl font-black text-foreground uppercase tracking-tight">
+                <h1 className="text-lg sm:text-2xl font-black text-foreground uppercase tracking-tight">
                   {editingOrderId ? `Editando ${editingOrderId}` : "Novo Pedido / Orçamento"}
                 </h1>
                 <p className="text-muted text-[10px] mt-1 font-black uppercase tracking-widest">
@@ -240,21 +240,21 @@ export default function PedidosPage() {
                 </p>
               </div>
             </div>
-            <div className="flex gap-4 items-center">
+            <div className="flex flex-wrap gap-2 items-center sm:justify-end">
               {lastSaved && (
                 <span className="text-[10px] text-muted flex items-center gap-1 font-black uppercase tracking-widest">
                   <CloudLightning size={14} className="text-emerald-500" />
                   Sincronizado às {lastSaved}
                 </span>
               )}
-              <div className="flex gap-2">
-                <button className="p-2.5 border border-card-border text-muted hover:text-foreground hover:bg-background rounded-xl transition-all">
+              <div className="flex gap-2 w-full sm:w-auto">
+                <button className="flex-1 sm:flex-none p-2.5 border border-card-border text-muted hover:text-foreground hover:bg-background rounded-xl transition-all flex items-center justify-center">
                   <History size={20} />
                 </button>
                 <button 
-                  onClick={() => handleSavePedido(orderStatus as any)}
+                  onClick={() => handleSavePedido(orderStatus as "Orçamento" | "Venda" | "Finalizado")}
                   disabled={isSaving}
-                  className="bg-foreground text-card px-6 py-2.5 rounded-[5px] font-black text-xs uppercase tracking-[0.2em] hover:opacity-90 transition-colors shadow-sm flex items-center gap-2 disabled:opacity-50"
+                  className="flex-1 sm:flex-none bg-foreground text-card px-4 sm:px-6 py-2.5 rounded-[5px] font-black text-[10px] sm:text-xs uppercase tracking-[0.2em] hover:opacity-90 transition-colors shadow-sm flex items-center justify-center gap-2 disabled:opacity-50"
                 >
                   <Save size={16} />
                   {isSaving ? "Salvando..." : (orderStatus === "Orçamento" ? "Salvar Rascunho" : "Salvar Alterações")}
@@ -323,123 +323,231 @@ export default function PedidosPage() {
 
           {/* Items Table / List */}
           <section className="bg-card border border-card-border/60 shadow-sm rounded-[5px] overflow-visible min-h-[450px]">
-            <table className="w-full text-left border-collapse">
-              <thead className="bg-secondary border-b border-secondary/20">
-                <tr>
-                  <th className="py-4 px-6 text-[10px] font-black uppercase tracking-widest text-white/90 border-r border-white/10">Produto / Serviço</th>
-                  <th className="py-4 px-6 text-[10px] font-black uppercase tracking-widest text-white/90 border-r border-white/10 w-24 text-center">Qtd.</th>
-                  <th className="py-4 px-6 text-[10px] font-black uppercase tracking-widest text-white/90 border-r border-white/10 w-28 text-center">Unid.</th>
-                  <th className="py-4 px-6 text-[10px] font-black uppercase tracking-widest text-white/90 border-r border-white/10 w-36 text-center">Preço Un.</th>
-                  <th className="py-4 px-6 text-[10px] font-black uppercase tracking-widest text-white/90 border-r border-white/10 w-40 text-right">Subtotal</th>
-                  <th className="py-4 px-6 w-14 text-center text-white/90"></th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-card-border/50">
-                {items.map((item) => {
-                  const filteredProducts = dbProducts.filter(p => p.name.toLowerCase().includes(item.name.toLowerCase()));
-                  const showDropdown = focusedItemId === item.id && item.name.length > 0;
+            {/* Mobile: Card layout for items */}
+            <div className="md:hidden divide-y divide-card-border/50">
+              {items.map((item) => {
+                const filteredProducts = dbProducts.filter(p => p.name.toLowerCase().includes(item.name.toLowerCase()));
+                const showDropdown = focusedItemId === item.id && item.name.length > 0;
 
-                  return (
-                    <tr key={item.id} className="group hover:bg-background/30 transition-all relative">
-                      <td className="py-3 px-6 border-r border-card-border/30 relative">
+                return (
+                  <div key={item.id} className="p-4 space-y-3 relative">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="flex-1 relative">
                         <input 
                           type="text" 
-                          placeholder="Digite ou busque o produto..." 
-                          className="w-full bg-transparent border-none focus:outline-none text-sm font-black text-foreground placeholder:text-muted/40 px-2"
+                          placeholder="Produto..." 
+                          className="w-full bg-transparent border-none focus:outline-none text-sm font-black text-foreground placeholder:text-muted/40 px-0"
                           value={item.name}
                           onChange={(e) => updateItem(item.id, "name", e.target.value)}
                           onFocus={() => setFocusedItemId(item.id)}
                           onBlur={() => setTimeout(() => setFocusedItemId(null), 200)}
                         />
-                        
-                        {/* Combobox Dropdown */}
                         {showDropdown && (
-                          <ul className="absolute left-0 top-full mt-2 w-full bg-card border border-card-border shadow-2xl rounded-xl overflow-hidden z-[60] max-h-52 overflow-y-auto animate-in fade-in slide-in-from-top-2">
+                          <ul className="absolute left-0 top-full mt-1 w-full bg-card border border-card-border shadow-2xl rounded-xl overflow-hidden z-[60] max-h-44 overflow-y-auto animate-in fade-in slide-in-from-top-2">
                             {filteredProducts.length > 0 ? (
                               filteredProducts.map(prod => (
                                 <li 
                                   key={prod.id} 
-                                  className="px-5 py-3 hover:bg-secondary/10 cursor-pointer text-sm border-b border-card-border last:border-0 flex justify-between items-center transition-colors"
+                                  className="px-4 py-2.5 hover:bg-secondary/10 cursor-pointer text-sm border-b border-card-border last:border-0 flex justify-between items-center transition-colors"
                                   onMouseDown={(e) => {
                                     e.preventDefault();
                                     selectProduct(item.id, prod);
                                   }}
                                 >
                                   <span className="font-black text-foreground text-xs uppercase">{prod.name}</span>
-                                  <span className="text-secondary text-[10px] font-black bg-secondary/5 px-2 py-0.5 rounded">R$ {(prod.cost || 0).toFixed(2)}</span>
+                                  <span className="text-secondary text-[9px] font-black bg-secondary/5 px-2 py-0.5 rounded">R$ {(prod.cost || 0).toFixed(2)}</span>
                                 </li>
                               ))
                             ) : (
-                              <li className="px-5 py-4 text-[10px] text-muted font-black uppercase tracking-widest text-center italic">
+                              <li className="px-4 py-3 text-[10px] text-muted font-black uppercase tracking-widest text-center italic">
                                 Item não catalogado. Registro manual ativado.
                               </li>
                             )}
                           </ul>
                         )}
-                      </td>
-                    <td className="py-3 px-6 border-r border-card-border/30">
-                      <input 
-                        type="number" 
-                        className="w-full bg-background border border-card-border rounded-lg p-2 text-center text-sm font-black text-foreground focus:ring-1 focus:ring-secondary outline-none"
-                        value={item.quantity}
-                        onChange={(e) => updateItem(item.id, "quantity", Number(e.target.value))}
-                      />
-                    </td>
-                    <td className="py-3 px-6 border-r border-card-border/30">
-                      <select 
-                        className="w-full bg-background border border-card-border rounded-lg p-2 text-center text-xs font-black text-foreground focus:ring-1 focus:ring-secondary outline-none appearance-none cursor-pointer"
-                        value={item.unit}
-                        onChange={(e) => updateItem(item.id, "unit", e.target.value)}
-                      >
-                        <option value="un">UN</option>
-                        <option value="m²">M²</option>
-                        <option value="kg">KG</option>
-                        <option value="m">M LINEAR</option>
-                      </select>
-                    </td>
-                    <td className="py-3 px-6 border-r border-card-border/30">
-                      <div className="relative">
-                        <span className="absolute left-2 top-1/2 -translate-y-1/2 text-muted text-[10px] font-black">R$</span>
-                        <input 
-                          type="number" 
-                          className="w-full bg-background border border-card-border rounded-lg p-2 pl-8 text-right text-sm font-black text-foreground focus:ring-1 focus:ring-secondary outline-none"
-                          value={item.price}
-                          onChange={(e) => updateItem(item.id, "price", Number(e.target.value))}
-                        />
                       </div>
-                    </td>
-                    <td className="py-3 px-6 border-r border-card-border/30 text-right font-black text-sm text-foreground pr-6">
-                      R$ {(item.quantity * item.price).toFixed(2)}
-                    </td>
-                    <td className="py-3 px-6 text-center">
                       <button 
                         onClick={() => removeItem(item.id)}
-                        className="p-2 text-muted hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-all"
+                        className="p-1.5 text-muted hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-all shrink-0"
                       >
-                        <Trash2 size={18} />
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
+                    <div className="grid grid-cols-3 gap-2">
+                      <div>
+                        <label className="text-[8px] font-black text-muted uppercase tracking-widest mb-1 block">Qtd</label>
+                        <input 
+                          type="number" 
+                          className="w-full bg-background border border-card-border rounded-lg p-2 text-center text-sm font-black text-foreground focus:ring-1 focus:ring-secondary outline-none"
+                          value={item.quantity}
+                          onChange={(e) => updateItem(item.id, "quantity", Number(e.target.value))}
+                        />
+                      </div>
+                      <div>
+                        <label className="text-[8px] font-black text-muted uppercase tracking-widest mb-1 block">Un</label>
+                        <select 
+                          className="w-full bg-background border border-card-border rounded-lg p-2 text-center text-xs font-black text-foreground focus:ring-1 focus:ring-secondary outline-none appearance-none cursor-pointer"
+                          value={item.unit}
+                          onChange={(e) => updateItem(item.id, "unit", e.target.value)}
+                        >
+                          <option value="un">UN</option>
+                          <option value="m²">M²</option>
+                          <option value="kg">KG</option>
+                          <option value="m">M LINEAR</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label className="text-[8px] font-black text-muted uppercase tracking-widest mb-1 block">Preço</label>
+                        <div className="relative">
+                          <span className="absolute left-1.5 top-1/2 -translate-y-1/2 text-muted text-[9px] font-black">R$</span>
+                          <input 
+                            type="number" 
+                            className="w-full bg-background border border-card-border rounded-lg p-2 pl-6 text-right text-sm font-black text-foreground focus:ring-1 focus:ring-secondary outline-none"
+                            value={item.price}
+                            onChange={(e) => updateItem(item.id, "price", Number(e.target.value))}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex justify-end pt-1">
+                      <span className="text-xs font-black text-foreground">
+                        Subtotal: R$ {(item.quantity * item.price).toFixed(2)}
+                      </span>
+                    </div>
+                  </div>
+                );
+              })}
+              <div className="p-4 bg-background/20">
+                <button 
+                  onClick={addItem}
+                  className="flex items-center gap-3 text-secondary font-black hover:scale-105 transition-all text-xs uppercase tracking-widest"
+                >
+                  <Plus className="bg-secondary text-white p-1 rounded-lg" size={24} />
+                  ADICIONAR ITEM À LISTA
+                </button>
+              </div>
+            </div>
+
+            {/* Desktop: Table layout */}
+            <div className="hidden md:block">
+              <table className="w-full text-left border-collapse">
+                <thead className="bg-secondary border-b border-secondary/20">
+                  <tr>
+                    <th className="py-4 px-6 text-[10px] font-black uppercase tracking-widest text-white/90 border-r border-white/10">Produto / Serviço</th>
+                    <th className="py-4 px-6 text-[10px] font-black uppercase tracking-widest text-white/90 border-r border-white/10 w-24 text-center">Qtd.</th>
+                    <th className="py-4 px-6 text-[10px] font-black uppercase tracking-widest text-white/90 border-r border-white/10 w-28 text-center">Unid.</th>
+                    <th className="py-4 px-6 text-[10px] font-black uppercase tracking-widest text-white/90 border-r border-white/10 w-36 text-center">Preço Un.</th>
+                    <th className="py-4 px-6 text-[10px] font-black uppercase tracking-widest text-white/90 border-r border-white/10 w-40 text-right">Subtotal</th>
+                    <th className="py-4 px-6 w-14 text-center text-white/90"></th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-card-border/50">
+                  {items.map((item) => {
+                    const filteredProducts = dbProducts.filter(p => p.name.toLowerCase().includes(item.name.toLowerCase()));
+                    const showDropdown = focusedItemId === item.id && item.name.length > 0;
+
+                    return (
+                      <tr key={item.id} className="group hover:bg-background/30 transition-all relative">
+                        <td className="py-3 px-6 border-r border-card-border/30 relative">
+                          <input 
+                            type="text" 
+                            placeholder="Digite ou busque o produto..." 
+                            className="w-full bg-transparent border-none focus:outline-none text-sm font-black text-foreground placeholder:text-muted/40 px-2"
+                            value={item.name}
+                            onChange={(e) => updateItem(item.id, "name", e.target.value)}
+                            onFocus={() => setFocusedItemId(item.id)}
+                            onBlur={() => setTimeout(() => setFocusedItemId(null), 200)}
+                          />
+                          
+                          {/* Combobox Dropdown */}
+                          {showDropdown && (
+                            <ul className="absolute left-0 top-full mt-2 w-full bg-card border border-card-border shadow-2xl rounded-xl overflow-hidden z-[60] max-h-52 overflow-y-auto animate-in fade-in slide-in-from-top-2">
+                              {filteredProducts.length > 0 ? (
+                                filteredProducts.map(prod => (
+                                  <li 
+                                    key={prod.id} 
+                                    className="px-5 py-3 hover:bg-secondary/10 cursor-pointer text-sm border-b border-card-border last:border-0 flex justify-between items-center transition-colors"
+                                    onMouseDown={(e) => {
+                                      e.preventDefault();
+                                      selectProduct(item.id, prod);
+                                    }}
+                                  >
+                                    <span className="font-black text-foreground text-xs uppercase">{prod.name}</span>
+                                    <span className="text-secondary text-[10px] font-black bg-secondary/5 px-2 py-0.5 rounded">R$ {(prod.cost || 0).toFixed(2)}</span>
+                                  </li>
+                                ))
+                              ) : (
+                                <li className="px-5 py-4 text-[10px] text-muted font-black uppercase tracking-widest text-center italic">
+                                  Item não catalogado. Registro manual ativado.
+                                </li>
+                              )}
+                            </ul>
+                          )}
+                        </td>
+                      <td className="py-3 px-6 border-r border-card-border/30">
+                        <input 
+                          type="number" 
+                          className="w-full bg-background border border-card-border rounded-lg p-2 text-center text-sm font-black text-foreground focus:ring-1 focus:ring-secondary outline-none"
+                          value={item.quantity}
+                          onChange={(e) => updateItem(item.id, "quantity", Number(e.target.value))}
+                        />
+                      </td>
+                      <td className="py-3 px-6 border-r border-card-border/30">
+                        <select 
+                          className="w-full bg-background border border-card-border rounded-lg p-2 text-center text-xs font-black text-foreground focus:ring-1 focus:ring-secondary outline-none appearance-none cursor-pointer"
+                          value={item.unit}
+                          onChange={(e) => updateItem(item.id, "unit", e.target.value)}
+                        >
+                          <option value="un">UN</option>
+                          <option value="m²">M²</option>
+                          <option value="kg">KG</option>
+                          <option value="m">M LINEAR</option>
+                        </select>
+                      </td>
+                      <td className="py-3 px-6 border-r border-card-border/30">
+                        <div className="relative">
+                          <span className="absolute left-2 top-1/2 -translate-y-1/2 text-muted text-[10px] font-black">R$</span>
+                          <input 
+                            type="number" 
+                            className="w-full bg-background border border-card-border rounded-lg p-2 pl-8 text-right text-sm font-black text-foreground focus:ring-1 focus:ring-secondary outline-none"
+                            value={item.price}
+                            onChange={(e) => updateItem(item.id, "price", Number(e.target.value))}
+                          />
+                        </div>
+                      </td>
+                      <td className="py-3 px-6 border-r border-card-border/30 text-right font-black text-sm text-foreground pr-6">
+                        R$ {(item.quantity * item.price).toFixed(2)}
+                      </td>
+                      <td className="py-3 px-6 text-center">
+                        <button 
+                          onClick={() => removeItem(item.id)}
+                          className="p-2 text-muted hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-all"
+                        >
+                          <Trash2 size={18} />
+                        </button>
+                      </td>
+                    </tr>
+                    );
+                  })}
+                  <tr>
+                    <td colSpan={6} className="p-4 bg-background/20">
+                      <button 
+                        onClick={addItem}
+                        className="flex items-center gap-3 text-secondary font-black hover:scale-105 transition-all text-xs uppercase tracking-widest"
+                      >
+                        <Plus className="bg-secondary text-white p-1 rounded-lg" size={24} />
+                        ADICIONAR ITEM À LISTA
                       </button>
                     </td>
                   </tr>
-                  );
-                })}
-                <tr>
-                  <td colSpan={6} className="p-4 bg-background/20">
-                    <button 
-                      onClick={addItem}
-                      className="flex items-center gap-3 text-secondary font-black hover:scale-105 transition-all text-xs uppercase tracking-widest"
-                    >
-                      <Plus className="bg-secondary text-white p-1 rounded-lg" size={24} />
-                      ADICIONAR ITEM À LISTA
-                    </button>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+                </tbody>
+              </table>
+            </div>
           </section>
         </div>
 
         {/* Checkout Sidebar */}
-        <aside className="w-full lg:w-96 bg-card border border-card-border/60 shadow-xl rounded-[5px] p-8 flex flex-col justify-between sticky bottom-0 lg:h-auto overflow-y-auto">
+        <aside className="w-full lg:w-96 bg-card border border-card-border/60 shadow-xl rounded-[5px] p-4 sm:p-8 flex flex-col justify-between lg:sticky lg:bottom-0 lg:h-auto lg:overflow-y-auto">
           <div className="space-y-8">
             <h2 className="text-xl font-black flex items-center justify-between text-foreground border-b border-card-border pb-6 uppercase tracking-tighter">
               {orderStatus} <FileCheck2 className="text-secondary" size={24} />

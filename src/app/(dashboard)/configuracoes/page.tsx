@@ -25,6 +25,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { getConfiguracoes, saveConfiguracoes } from "./actions";
+import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 
 const THEMES = [
@@ -143,6 +144,7 @@ const THEMES = [
 ];
 
 export default function ConfiguracoesPage() {
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState("temas");
   const [activeTheme, setActiveTheme] = useState("modern");
   const [isApplied, setIsApplied] = useState(false);
@@ -166,13 +168,25 @@ export default function ConfiguracoesPage() {
     observacoesPadrao: ""
   });
 
-  const applyTheme = () => {
+  const [empresaId, setEmpresaId] = useState<string | null>(null);
+
+  const applyTheme = async () => {
     const theme = THEMES.find(t => t.id === activeTheme);
     if (theme) {
       Object.entries(theme.vars).forEach(([key, value]) => {
         document.documentElement.style.setProperty(key, value);
       });
-      localStorage.setItem("erp-theme", JSON.stringify(theme));
+      localStorage.setItem("erp-theme", JSON.stringify(theme)); // Keep local as fallback for fast load
+
+      // Save to Supabase
+      if (empresaId) {
+        try {
+          await supabase.from("empresas").update({ tema: theme.id }).eq("id", empresaId);
+        } catch (error) {
+          console.error("Erro ao salvar tema no banco", error);
+        }
+      }
+
       setIsApplied(true);
       setTimeout(() => setIsApplied(false), 3000);
     }
@@ -180,24 +194,58 @@ export default function ConfiguracoesPage() {
 
   // Load data on mount
   useEffect(() => {
-    const saved = localStorage.getItem("erp-theme");
-    if (saved) {
-      const theme = JSON.parse(saved);
-      setActiveTheme(theme.id);
-    }
+    async function loadGlobalConfig() {
+      // 1. Setup Auth and get tenant (empresa) ID
+      const { data: { user } } = await supabase.auth.getUser();
+      let compId = null;
+      
+      if (user) {
+        compId = user.user_metadata?.empresa_id;
+        const { data: profile } = await supabase.from("perfis_usuarios").select("empresa_id, role").eq("id", user.id).single();
+        if (profile) {
+          compId = compId || profile.empresa_id;
+          // Bloquear acesso de funcionários
+          if (profile.role === "funcionario") {
+            router.replace("/dashboard");
+            return;
+          }
+        }
+        setEmpresaId(compId);
+      }
 
-    async function loadConfig() {
+      // 2. Try to load global theme from empresa
+      if (compId) {
+        const { data: empresa } = await supabase.from("empresas").select("tema").eq("id", compId).single();
+        if (empresa?.tema) {
+          const theme = THEMES.find(t => t.id === empresa.tema);
+          if (theme) {
+            setActiveTheme(theme.id);
+            Object.entries(theme.vars).forEach(([key, value]) => {
+              document.documentElement.style.setProperty(key, value);
+            });
+            localStorage.setItem("erp-theme", JSON.stringify(theme));
+          }
+        }
+      } else {
+        // Fallback local
+        const saved = localStorage.getItem("erp-theme");
+        if (saved) {
+          const theme = JSON.parse(saved);
+          setActiveTheme(theme.id);
+        }
+      }
+
+      // 3. Load other settings
       const data = await getConfiguracoes();
       if (data) {
-        // Garantir que nenhum campo seja null para evitar erros no React
-        const safeData = { ...data } as any;
+        const safeData = { ...data } as Record<string, string | number | null>;
         Object.keys(safeData).forEach(key => {
           if (safeData[key] === null) safeData[key] = "";
         });
-        setConfig(safeData);
+        setConfig(safeData as typeof config);
       }
     }
-    loadConfig();
+    loadGlobalConfig();
   }, []);
 
   const handleSaveConfig = async () => {
@@ -224,7 +272,7 @@ export default function ConfiguracoesPage() {
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
         {/* Sidebar Mini Settings */}
-        <aside className="space-y-1">
+        <aside className="flex flex-row overflow-x-auto md:flex-col gap-1 pb-2 md:pb-0 md:space-y-1 custom-scrollbar min-w-0">
           {[
             { id: "temas", icon: Palette, label: "TEMAS" },
             { id: "empresa", icon: Building2, label: "EMPRESA" },
@@ -238,7 +286,8 @@ export default function ConfiguracoesPage() {
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
               className={cn(
-                "w-full flex items-center gap-3 px-4 py-2.5 rounded-[5px] text-[10px] font-black transition-all tracking-[0.15em] uppercase text-left",
+                "flex items-center gap-3 px-4 py-2.5 rounded-[5px] text-[10px] font-black transition-all tracking-[0.15em] uppercase text-left whitespace-nowrap shrink-0",
+                "w-auto md:w-full",
                 activeTab === tab.id 
                   ? "bg-card text-foreground shadow-sm border border-card-border" 
                   : "text-muted hover:bg-card/30 hover:text-foreground border border-transparent"
@@ -309,10 +358,10 @@ export default function ConfiguracoesPage() {
                  <h2 className="text-[10px] font-black text-foreground uppercase tracking-[0.2em]">DADOS DA EMPRESA</h2>
               </div>
               
-              <div className="p-8 space-y-8">
+              <div className="p-4 sm:p-8 space-y-6 sm:space-y-8">
                 {/* Logo Upload Section */}
-                <div className="flex items-start gap-8 border-b border-card-border pb-8">
-                  <div className="w-32 h-32 rounded-2xl bg-background border-2 border-dashed border-card-border flex flex-col items-center justify-center gap-2 group hover:border-secondary transition-all cursor-pointer overflow-hidden relative">
+                <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 sm:gap-8 border-b border-card-border pb-6 sm:pb-8 text-center sm:text-left">
+                  <div className="w-32 h-32 shrink-0 rounded-2xl bg-background border-2 border-dashed border-card-border flex flex-col items-center justify-center gap-2 group hover:border-secondary transition-all cursor-pointer overflow-hidden relative">
                     {config.logoUrl ? (
                       <img src={config.logoUrl} alt="Logo" className="w-full h-full object-contain p-2" />
                     ) : (
@@ -327,7 +376,7 @@ export default function ConfiguracoesPage() {
                     <p className="text-[10px] text-muted font-bold leading-relaxed uppercase tracking-tight max-w-md">
                       Esta imagem será exibida no cabeçalho dos seus orçamentos e relatórios impressos. Recomendamos fundo transparente.
                     </p>
-                    <div className="flex gap-2">
+                    <div className="flex justify-center sm:justify-start gap-2">
                        <button className="text-[10px] font-black text-secondary hover:bg-secondary/10 px-4 py-2 rounded-lg border border-secondary/20 transition-all uppercase tracking-widest">ALTERAR LOGO</button>
                        <button className="text-[10px] font-black text-muted hover:text-rose-500 px-4 py-2 transition-all uppercase tracking-widest">REMOVER</button>
                     </div>
@@ -479,17 +528,20 @@ export default function ConfiguracoesPage() {
                  <h2 className="text-[10px] font-black text-foreground uppercase tracking-[0.2em]">PADRÕES DE ORÇAMENTO</h2>
               </div>
               
-              <div className="p-8 space-y-6">
+              <div className="p-4 sm:p-8 space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-2">
-                    <label className="text-[9px] font-black text-muted uppercase tracking-widest flex items-center gap-2">
+                    <label htmlFor="validadeOrcamento" className="text-[9px] font-black text-muted uppercase tracking-widest flex items-center gap-2">
                       <Clock size={12} className="text-secondary" /> VALIDADE DA PROPOSTA (DIAS)
                     </label>
                     <input 
+                      id="validadeOrcamento"
                       type="number" 
                       className="w-full bg-background border border-card-border rounded-xl px-4 py-3 text-sm font-bold focus:ring-2 focus:ring-secondary/20 focus:border-secondary outline-none transition-all"
                       value={config.validadeOrcamento}
                       onChange={(e) => setConfig({...config, validadeOrcamento: Number(e.target.value)})}
+                      placeholder="15"
+                      title="Validade da proposta em dias"
                     />
                   </div>
                   <div className="space-y-2">
@@ -623,8 +675,9 @@ export default function ConfiguracoesPage() {
                           
                           alert("Chamado de suporte aberto com sucesso! Nosso time retornará o contato.");
                           textarea.value = "";
-                        } catch (err: unknown) {
-                          alert("Erro ao enviar chamado: " + err.message);
+                        } catch (err) {
+                          const error = err as { message?: string };
+                          alert("Erro ao enviar chamado: " + (error?.message || "Erro desconhecido"));
                         } finally {
                           btn.disabled = false;
                           btn.innerText = "ENVIAR CHAMADO";

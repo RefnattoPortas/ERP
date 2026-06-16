@@ -109,37 +109,37 @@ export default function CadastroPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#1c1917] text-[#f5f5f4] flex flex-col justify-center items-center font-sans overflow-x-hidden relative select-none">
+    <div className="min-h-screen bg-[#f5f5f4] text-[#1c1917] flex flex-col justify-center items-center font-sans overflow-x-hidden relative select-none">
       
-      {/* Malha Quadriculada de Fundo Premium sutil em tom carvão escuro */}
-      <div className="absolute inset-0 opacity-[0.03] pointer-events-none bg-[linear-gradient(to_right,#f5f5f4_1px,transparent_1px),linear-gradient(to_bottom,#f5f5f4_1px,transparent_1px)] bg-[size:30px_30px]"></div>
+      {/* Malha Quadriculada de Fundo */}
+      <div className="absolute inset-0 opacity-[0.04] pointer-events-none bg-[linear-gradient(to_right,#1c1917_1px,transparent_1px),linear-gradient(to_bottom,#1c1917_1px,transparent_1px)] bg-[size:40px_40px]"></div>
 
       {/* Brilho verde esmeralda no topo */}
       <div className="absolute -top-[300px] left-1/2 -translate-x-1/2 w-[600px] h-[600px] rounded-full bg-[#059669]/10 blur-[120px] pointer-events-none"></div>
 
-      <div className="w-full max-w-md p-8 bg-[#1c1917]/90 border border-white/5 shadow-2xl relative z-10 animate-in fade-in slide-in-from-bottom-6 duration-500 rounded-[2px]">
+      <div className="w-full max-w-md p-8 bg-white/95 border border-[#d6d3d1] shadow-xl relative z-10 animate-in fade-in slide-in-from-bottom-6 duration-500 rounded-[5px]">
         
         {/* Header */}
         <div className="flex flex-col items-center mb-8">
-          <div className="w-10 h-10 bg-[#059669] flex items-center justify-center border border-white/10 shadow-[4px_4px_0px_rgba(5,150,105,0.2)] rounded-[2px] mb-4">
+          <div className="w-10 h-10 bg-[#059669] flex items-center justify-center border-2 border-[#1c1917] shadow-[2px_2px_0px_#d6d3d1] rounded-[4px] mb-4">
             <Zap className="text-white w-5 h-5 stroke-[2.5]" />
           </div>
           <span className="text-[10px] font-black tracking-[0.25em] text-[#059669] uppercase mb-1">Ágil ERP SaaS</span>
-          <h2 className="text-2xl font-black uppercase tracking-tight text-white">Criar Nova Conta</h2>
-          <p className="text-[#a8a29e] text-[11px] font-bold mt-1 text-center">
+          <h2 className="text-2xl font-black uppercase tracking-tight text-[#1c1917]">Criar Nova Conta</h2>
+          <p className="text-[#44403c] text-[11px] font-bold mt-1 text-center">
             Comece a gerenciar sua empresa com máxima performance e simplicidade
           </p>
         </div>
 
         {error && (
-          <div className="bg-red-500/10 border border-red-500/20 text-red-400 p-3 mb-6 flex items-start gap-2.5 rounded-[2px] animate-shake">
+          <div className="bg-red-50 border border-red-200 text-red-600 p-3 mb-6 flex items-start gap-2.5 rounded-[5px] animate-shake">
             <AlertCircle className="w-4 h-4 mt-0.5 shrink-0" />
             <div className="text-[11px] font-bold leading-normal">{error}</div>
           </div>
         )}
 
         {success && (
-          <div className="bg-[#059669]/10 border border-[#059669]/20 text-[#34d399] p-3 mb-6 flex items-start gap-2.5 rounded-[2px]">
+          <div className="bg-emerald-50 border border-emerald-200 text-emerald-700 p-3 mb-6 flex items-start gap-2.5 rounded-[5px]">
             <ShieldCheck className="w-4 h-4 mt-0.5 shrink-0" />
             <div className="text-[11px] font-bold leading-normal">
               Cadastro concluído com sucesso! Redirecionando para o sistema...
@@ -150,7 +150,7 @@ export default function CadastroPage() {
         {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-5">
           <div>
-            <label className="block text-[10px] font-black uppercase tracking-widest text-[#a8a29e] mb-1.5">
+            <label className="block text-[10px] font-black uppercase tracking-widest text-[#44403c] mb-1.5">
               Nome Fantasia da Empresa
             </label>
             <input
@@ -160,12 +160,12 @@ export default function CadastroPage() {
               value={formData.companyName}
               onChange={handleChange}
               disabled={loading || success}
-              className="w-full bg-white/5 border border-white/10 focus:border-[#059669] text-white px-4 py-3 text-xs outline-none transition-all duration-300 font-bold rounded-[2px] placeholder:text-[#57534e]"
+              className="w-full bg-white border border-[#d6d3d1] focus:border-[#059669] focus:ring-1 focus:ring-[#059669] text-[#1c1917] px-4 py-3 text-xs outline-none transition-all duration-300 font-bold rounded-[5px] placeholder:text-[#a8a29e]"
             />
           </div>
 
           <div>
-            <label className="block text-[10px] font-black uppercase tracking-widest text-[#a8a29e] mb-1.5">
+            <label className="block text-[10px] font-black uppercase tracking-widest text-[#44403c] mb-1.5">
               Seu Nome Completo (Administrador)
             </label>
             <input
@@ -175,12 +175,12 @@ export default function CadastroPage() {
               value={formData.userName}
               onChange={handleChange}
               disabled={loading || success}
-              className="w-full bg-white/5 border border-white/10 focus:border-[#059669] text-white px-4 py-3 text-xs outline-none transition-all duration-300 font-bold rounded-[2px] placeholder:text-[#57534e]"
+              className="w-full bg-white border border-[#d6d3d1] focus:border-[#059669] focus:ring-1 focus:ring-[#059669] text-[#1c1917] px-4 py-3 text-xs outline-none transition-all duration-300 font-bold rounded-[5px] placeholder:text-[#a8a29e]"
             />
           </div>
 
           <div>
-            <label className="block text-[10px] font-black uppercase tracking-widest text-[#a8a29e] mb-1.5">
+            <label className="block text-[10px] font-black uppercase tracking-widest text-[#44403c] mb-1.5">
               Endereço de E-mail
             </label>
             <input
@@ -190,12 +190,12 @@ export default function CadastroPage() {
               value={formData.email}
               onChange={handleChange}
               disabled={loading || success}
-              className="w-full bg-white/5 border border-white/10 focus:border-[#059669] text-white px-4 py-3 text-xs outline-none transition-all duration-300 font-bold rounded-[2px] placeholder:text-[#57534e]"
+              className="w-full bg-white border border-[#d6d3d1] focus:border-[#059669] focus:ring-1 focus:ring-[#059669] text-[#1c1917] px-4 py-3 text-xs outline-none transition-all duration-300 font-bold rounded-[5px] placeholder:text-[#a8a29e]"
             />
           </div>
 
           <div>
-            <label className="block text-[10px] font-black uppercase tracking-widest text-[#a8a29e] mb-1.5">
+            <label className="block text-[10px] font-black uppercase tracking-widest text-[#44403c] mb-1.5">
               Senha de Acesso
             </label>
             <input
@@ -205,14 +205,14 @@ export default function CadastroPage() {
               value={formData.password}
               onChange={handleChange}
               disabled={loading || success}
-              className="w-full bg-white/5 border border-white/10 focus:border-[#059669] text-white px-4 py-3 text-xs outline-none transition-all duration-300 font-bold rounded-[2px] placeholder:text-[#57534e]"
+              className="w-full bg-white border border-[#d6d3d1] focus:border-[#059669] focus:ring-1 focus:ring-[#059669] text-[#1c1917] px-4 py-3 text-xs outline-none transition-all duration-300 font-bold rounded-[5px] placeholder:text-[#a8a29e]"
             />
           </div>
 
           <button
             type="submit"
             disabled={loading || success}
-            className="w-full bg-[#059669] hover:bg-[#047857] active:scale-[0.98] disabled:opacity-50 text-white font-black text-[11px] uppercase tracking-[0.2em] py-3.5 mt-2 rounded-[2px] transition-all duration-300 cursor-pointer flex items-center justify-center gap-2 shadow-lg shadow-emerald-950/20"
+            className="w-full bg-[#059669] hover:bg-[#047857] active:scale-[0.98] disabled:opacity-50 text-white font-black text-[11px] uppercase tracking-[0.2em] py-3.5 mt-2 rounded-[5px] transition-all duration-300 cursor-pointer flex items-center justify-center gap-2 shadow-md shadow-emerald-950/10"
           >
             {loading ? (
               <>
@@ -228,12 +228,12 @@ export default function CadastroPage() {
         </form>
 
         {/* Footer Link */}
-        <div className="mt-6 pt-6 border-t border-white/5 text-center">
-          <p className="text-[#a8a29e] text-[11px] font-bold">
+        <div className="mt-6 pt-6 border-t border-[#d6d3d1] text-center">
+          <p className="text-[#44403c] text-[11px] font-bold">
             Já possui uma conta ativa?{" "}
             <Link 
               href="/login" 
-              className="text-[#059669] hover:text-[#34d399] underline transition-colors"
+              className="text-[#059669] hover:text-[#047857] underline transition-colors"
             >
               Fazer Login
             </Link>
