@@ -7,12 +7,12 @@ import { revalidatePath } from "next/cache";
 
 interface PedidoInput {
   id: string;
-  clienteId: number;
+  clienteId: number | null;
   date: string;
   status: string;
   total: number;
   paymentMethod?: string;
-  paymentStatus?: string;
+  paymentStatus?: "Pago" | "Pendente";
 }
 
 interface ItemInput {

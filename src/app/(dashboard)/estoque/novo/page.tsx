@@ -40,7 +40,17 @@ function NovoProdutoForm() {
       async function load() {
         const item = await getItemEstoque(Number(id));
         if (item) {
-          setFormData(item);
+          setFormData({
+            name: item.name,
+            sku: item.sku,
+            category: item.category ?? "final",
+            stock: item.stock ?? 0,
+            minStock: item.minStock ?? 0,
+            cost: item.cost ?? 0,
+            purchasePrice: item.purchasePrice ?? 0,
+            supplier: item.supplier ?? "",
+            critical: item.critical ?? false,
+          });
         }
         setIsLoading(false);
       }

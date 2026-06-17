@@ -22,7 +22,7 @@ import {
   History as HistoryIcon
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { getClientes, saveCliente, deleteCliente } from "./actions";
+import { getClientes, saveCliente, deleteCliente, type ClienteInput } from "./actions";
 
 interface Client {
   id: number;
@@ -94,7 +94,7 @@ export default function ClientesPage() {
       return;
     }
     
-    const result = await saveCliente({ ...formData, id: editingId ?? undefined });
+    const result = await saveCliente({ ...formData, id: editingId ?? undefined } as ClienteInput);
     if (result.success) {
       const data = await getClientes(searchQuery);
       setClients(data as Client[]);

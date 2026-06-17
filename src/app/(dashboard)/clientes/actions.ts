@@ -23,7 +23,7 @@ export async function getClientes(searchQuery?: string) {
   }
 }
 
-interface ClienteInput {
+export interface ClienteInput {
   id?: number;
   name: string;
   company?: string;

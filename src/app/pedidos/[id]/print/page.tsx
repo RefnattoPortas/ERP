@@ -110,13 +110,13 @@ export default async function PrintPedidoPage({ params }: { params: Promise<{ id
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
-              {pedido.itens?.map((item: { id: number | string; produto?: { name: string }; unit?: string; quantity: number; price: number }, index: number) => (
+              {pedido.itens?.map((item, index) => (
                 <tr key={item.id} className="text-xs">
                   <td className="py-3 text-center font-bold text-gray-500">{index + 1}</td>
                   <td className="py-3 font-bold text-slate-800 uppercase pr-4">
                     {item.produto?.name || "Produto Genérico"}
                   </td>
-                  <td className="py-3 text-center text-gray-600 font-medium">{item.unit || "UN"}</td>
+                  <td className="py-3 text-center text-gray-600 font-medium">{"UN"}</td>
                   <td className="py-3 text-center text-gray-600 font-medium">{item.quantity}</td>
                   <td className="py-3 text-right text-gray-600 font-medium">R$ {item.price.toFixed(2)}</td>
                   <td className="py-3 text-right font-black text-slate-800">

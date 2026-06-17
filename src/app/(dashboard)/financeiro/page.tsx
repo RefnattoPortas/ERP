@@ -317,7 +317,7 @@ export default function FinanceiroPage() {
                       <button 
                         onClick={async () => {
                           const { saveLancamento } = await import("./actions");
-                          await saveLancamento({ ...tx, status: tx.status === "Pago" ? "Pendente" : "Pago" });
+                          await saveLancamento({ ...tx, doc: tx.doc ?? undefined, category: tx.category ?? undefined, status: tx.status === "Pago" ? "Pendente" : "Pago" });
                           setRefreshKey(k => k + 1);
                         }} 
                         className="p-1.5 text-muted hover:text-emerald-600 hover:bg-emerald-500/10 rounded-[5px] transition-all border border-transparent hover:border-emerald-100" 

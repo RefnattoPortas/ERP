@@ -33,7 +33,7 @@ interface KanbanCard {
     date: string;
     status: string;
     total: number;
-    clienteId: number;
+    clienteId: number | null;
     cliente?: { name: string } | null;
     itens?: { produtoId: number; quantity: number; price: number }[];
   };
@@ -61,7 +61,7 @@ export default function KanbanPage() {
       setIsLoading(true);
       const orders = await getPedidos();
       // Only show orders that are not quotes
-      const kanbanOrders = orders.filter((o: { status: string }) => o.status !== "Orçamento").map((o: { status: string, id: string, cliente?: { name: string } | null, total: number, date: string, itens?: { produtoId: number; quantity: number; price: number }[], clienteId: number }) => ({
+      const kanbanOrders = orders.filter((o: { status: string }) => o.status !== "Orçamento").map((o) => ({
         id: o.id,
         title: `Pedido ${o.id}`,
         client: o.cliente?.name || "Sem Cliente",

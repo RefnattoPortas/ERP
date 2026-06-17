@@ -108,8 +108,8 @@ export default function DashboardPage() {
                   <div className="space-y-1.5 animate-in fade-in slide-in-from-bottom-2 duration-300">
                     {isLoading ? (
                       <p className="text-[10px] text-muted font-black uppercase tracking-widest text-center py-8 italic">Carregando dados reais...</p>
-                    ) : stats?.recentOrders.length > 0 ? (
-                      stats.recentOrders.map((order: { id: string; cliente: { name: string } | null; total: number; status: string; date: string }) => (
+                    ) : stats && stats.recentOrders && stats.recentOrders.length > 0 ? (
+                      stats.recentOrders.map((order) => (
                         <div key={order.id} className="flex items-center justify-between py-2.5 px-4 rounded-xl hover:bg-background transition-colors cursor-pointer border border-transparent hover:border-card-border group">
                           <div className="flex items-center gap-3 overflow-hidden">
                             <div className="w-7 h-7 rounded-full bg-background flex-shrink-0 flex items-center justify-center border border-card-border group-hover:border-secondary/30 transition-colors shadow-sm">
@@ -194,7 +194,7 @@ export default function DashboardPage() {
               value={`R$ ${stats?.contasHoje.toLocaleString('pt-BR', { minimumFractionDigits: 2 }) || "0,00"}`} 
               trend="Pagar" 
               color="rose" 
-              isAlert={stats?.contasHoje > 0}
+              isAlert={(stats?.contasHoje ?? 0) > 0}
             />
             <StatCard 
               icon={PackageSearch} 

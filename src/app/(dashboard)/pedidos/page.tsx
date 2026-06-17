@@ -56,7 +56,7 @@ export default function PedidosPage() {
   const router = useRouter();
   const [orders, setOrders] = useState<Order[]>([]);
   const [dbClients, setDbClients] = useState<{ id: number; name: string; company?: string | null }[]>([]);
-  const [dbProducts, setDbProducts] = useState<{ id: number; name: string; cost?: number }[]>([]);
+  const [dbProducts, setDbProducts] = useState<{ id: number; name: string; cost?: number | null }[]>([]);
   const [isCreating, setIsCreating] = useState(false);
   const [items, setItems] = useState<Item[]>([]);
   const [clientSearch, setClientSearch] = useState("");
@@ -72,7 +72,7 @@ export default function PedidosPage() {
   const [editingOrderId, setEditingOrderId] = useState<string | null>(null);
   const [checkoutModalOpen, setCheckoutModalOpen] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState("Dinheiro / PIX");
-  const [paymentStatus, setPaymentStatus] = useState("Pendente");
+  const [paymentStatus, setPaymentStatus] = useState<"Pago" | "Pendente">("Pendente");
   const [orderStatus, setOrderStatus] = useState("Orçamento");
 
   // Load orders, clients and products
@@ -128,7 +128,7 @@ export default function PedidosPage() {
         setClientSearch("");
       }
       
-      setItems(fullOrder.itens.map((i: { id: number | string; produtoId: number; produto?: { name: string }; unit?: string; quantity: number; price: number }) => ({
+      setItems(fullOrder.itens.map((i) => ({
         id: Math.random().toString(36).substr(2, 9),
         produtoId: i.produtoId || 0,
         name: i.produto?.name || "Produto Genérico",
@@ -145,7 +145,7 @@ export default function PedidosPage() {
     setIsLoading(false);
   };
 
-  const handleSavePedido = async (status: "Orçamento" | "Venda" | "Finalizado", selectedPaymentMethod?: string, selectedPaymentStatus?: string) => {
+  const handleSavePedido = async (status: "Orçamento" | "Venda" | "Finalizado", selectedPaymentMethod?: string, selectedPaymentStatus?: "Pago" | "Pendente") => {
     if (!selectedCliente || items.length === 0) {
       alert("Selecione um cliente e adicione pelo menos um item.");
       return;
@@ -173,7 +173,7 @@ export default function PedidosPage() {
       setEditingOrderId(orderId);
       setOrderStatus(status);
     } else {
-      alert(res.error || "Erro ao salvar pedido");
+      alert("error" in res ? res.error : "Erro ao salvar pedido");
     }
   };
 
@@ -197,7 +197,7 @@ export default function PedidosPage() {
     setItems(items.map(item => item.id === id ? { ...item, [field]: value } : item));
   };
 
-  const selectProduct = (itemId: string, product: { id: number, name: string, cost?: number }) => {
+  const selectProduct = (itemId: string, product: { id: number, name: string, cost?: number | null }) => {
     setItems(items.map(item => 
       item.id === itemId 
         ? { 
@@ -682,7 +682,7 @@ export default function PedidosPage() {
                     <select 
                       className="w-full bg-background border border-card-border rounded-lg p-3 text-sm font-bold text-foreground focus:ring-1 focus:ring-secondary outline-none appearance-none"
                       value={paymentStatus}
-                      onChange={(e) => setPaymentStatus(e.target.value)}
+                      onChange={(e) => setPaymentStatus(e.target.value as "Pago" | "Pendente")}
                     >
                       <option value="Pendente">Pendente</option>
                       <option value="Pago">Pago</option>
